@@ -2,19 +2,17 @@ package io.hhplus.tdd.point;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class PointServiceImpl implements PointService {
     private final UserPointTable userPointTable;
     private final PointHistoryTable pointHistoryTable;
-
-    public PointServiceImpl(UserPointTable userPointTable, PointHistoryTable pointHistoryTable) {
-        this.userPointTable = userPointTable;
-        this.pointHistoryTable = pointHistoryTable;
-    }
 
     @Override
     public UserPoint getUserPoint(long userId) {
@@ -29,7 +27,7 @@ public class PointServiceImpl implements PointService {
     @Override
     public UserPoint chargeUserPoint(long userId, long amount) {
         UserPoint userPoint = userPointTable.insertOrUpdate(userId, amount);
-        pointHistoryTable.insert(userPoint.id(), amount, TransactionType.CHARGE, System.currentTimeMillis());
+        createHistory(userPoint.id(), amount, TransactionType.CHARGE);
         return userPoint;
     }
 
@@ -39,7 +37,11 @@ public class PointServiceImpl implements PointService {
         UserPoint usedPoint = currentPoint.use(amount);
 
         UserPoint userPoint = userPointTable.insertOrUpdate(usedPoint.id(), usedPoint.point());
-        pointHistoryTable.insert(userPoint.id(), amount, TransactionType.USE, System.currentTimeMillis());
+        createHistory(userPoint.id(), amount, TransactionType.USE);
         return userPoint;
+    }
+
+    private void createHistory(long userId, long amount, TransactionType transactionType) {
+        pointHistoryTable.insert(userId, amount, transactionType, System.currentTimeMillis());
     }
 }

@@ -28,7 +28,7 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public UserPoint chargeUserPoint(long userId, long amount) {
-        return null;
+        return new UserPoint(userId, amount, System.currentTimeMillis());
     }
 
     @Override

@@ -6,16 +6,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * 요구 기능
  * 1. 사용자 id로 포인트 조회
  * 2. 충전
- * 3. 포인트 이용
- * 4. 포인트 충전/이용 내역 조회
+ * 3. 포인트 사용
+ * 4. 포인트 충전/사용 내역 조회
  *
  * - 기능 요구사항
  *     - 포인트 내역 조회 테스트를 위해, 데이터를 셋업하는 로직이 구현되어야 함
@@ -85,9 +86,9 @@ public class PointServiceTest {
         assertThat(userPoint.point()).isEqualTo(amount);
     }
 
-    // ---------- 3. 포인트 이용 ----------
+    // ---------- 3. 포인트 사용 ----------
     @Test
-    @DisplayName("포인트를 이용하면 이용 금액만큼 차감된다")
+    @DisplayName("포인트를 사용하면 사용 금액만큼 차감된다")
     void usePoint() {
         // given
         long userId = 1L;
@@ -109,7 +110,7 @@ public class PointServiceTest {
     }
 
     @Test
-    @DisplayName("현재 잔액 이상의 포인트를 이용하면 예외를 던진다.")
+    @DisplayName("현재 잔액 이상의 포인트를 사용하면 예외를 던진다.")
     void useTooMuchPointThrowsException() {
         // given
         long userId = 1L;
@@ -123,5 +124,40 @@ public class PointServiceTest {
         assertThatThrownBy(() -> pointService.useUserPoint(userId, useAmount))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("잔액이 부족합니다");
+    }
+    
+    @Test
+    @DisplayName("사용자의 포인트 이용 내역을 조회할 수 있다")
+    void selectPointHistory() {
+        // given
+        long userId = 1L;
+
+        long pointHistoryId1 = 1L;
+        long amount2 = 100L;
+
+        long pointHistoryId2 = 2L;
+        long amount1 = 500L;
+
+        PointHistory chargeHistory = new PointHistory(pointHistoryId1, userId, amount1, TransactionType.CHARGE, System.currentTimeMillis());
+        PointHistory useHistory = new PointHistory(pointHistoryId2, userId, amount2, TransactionType.USE, System.currentTimeMillis());
+
+        List<PointHistory> mockHistories = List.of(chargeHistory, useHistory);
+
+        when(pointHistoryTable.selectAllByUserId(userId))
+                .thenReturn(mockHistories);
+
+        // when
+        List<PointHistory> userPointHistories = pointService.getUserPointHistories(userId);
+
+        // then
+        assertThat(userPointHistories).hasSize(2);
+
+        assertThat(userPointHistories.get(0).id()).isEqualTo(pointHistoryId1);
+        assertThat(userPointHistories.get(0).userId()).isEqualTo(userId);
+        assertThat(userPointHistories.get(0).amount()).isEqualTo(amount1);
+        assertThat(userPointHistories.get(0).type()).isEqualTo(TransactionType.CHARGE);
+
+        assertThat(userPointHistories.get(1).id()).isEqualTo(pointHistoryId2);
+        assertThat(userPointHistories.get(1).type()).isEqualTo(TransactionType.USE);
     }
 }

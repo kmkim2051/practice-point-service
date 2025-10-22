@@ -23,7 +23,7 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public List<PointHistory> getUserPointHistories(long userId) {
-        return List.of();
+        return pointHistoryTable.selectAllByUserId(userId);
     }
 
     @Override

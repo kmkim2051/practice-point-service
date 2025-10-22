@@ -33,7 +33,8 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public UserPoint useUserPoint(long userId, long amount) {
-        UserPoint currentUserPoint = userPointTable.selectById(userId);
-        return userPointTable.insertOrUpdate(currentUserPoint.id(), currentUserPoint.point() - amount);
+        UserPoint currentPoint = userPointTable.selectById(userId);
+        UserPoint usedPoint = currentPoint.use(amount);
+        return userPointTable.insertOrUpdate(usedPoint.id(), usedPoint.point());
     }
 }

@@ -124,6 +124,8 @@ public class PointServiceTest {
         assertThatThrownBy(() -> pointService.useUserPoint(userId, useAmount))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("잔액이 부족합니다");
+
+        verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
     }
     
     @Test

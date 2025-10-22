@@ -8,7 +8,7 @@ import java.util.List;
 public class PointServiceImpl implements PointService {
     @Override
     public UserPoint getUserPoint(long userId) {
-        return null;
+        return new UserPoint(userId, 0L, System.currentTimeMillis());
     }
 
     @Override

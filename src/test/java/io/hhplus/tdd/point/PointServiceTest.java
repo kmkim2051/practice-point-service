@@ -34,4 +34,19 @@ public class PointServiceTest {
         // then
         assertThat(userPoint).isNotNull();
     }
+
+    @Test
+    @DisplayName("처음 포인트를 충전하면 반환된 UserPoint 금액이 충전 금액과 동일하다")
+    void chargeUserPointIsNotNull() {
+        // given
+        long userId = 1L;
+        long amount = 500L;
+        // when
+        UserPoint userPoint = pointService.chargeUserPoint(userId, amount);
+
+        // then
+        assertThat(userPoint).isNotNull();
+        assertThat(userPoint.id()).isEqualTo(userId);
+        assertThat(userPoint.point()).isEqualTo(amount);
+    }
 }

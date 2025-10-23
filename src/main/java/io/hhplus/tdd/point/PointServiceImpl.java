@@ -7,8 +7,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-// todo: 정책 정하기. 100원 미만 출금 x. 1000원 이상부터 충전. 충전은 1000원 단위
-
+/*
+포인트 서비스 정책
+[출금 정책]
+ #1. 100원 미만의 포인트를 출금할 수 없다.
+[충전 정책]
+ #2. 100원 미만의 포인트를 충전할 수 없다.
+ #3. 포인트 충전은 10원 단위로 수행한다.
+*/
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +31,10 @@ public class PointServiceImpl implements PointService {
     public List<PointHistory> getUserPointHistories(long userId) {
         return pointHistoryTable.selectAllByUserId(userId);
     }
-
+    /* [충전 정책]
+     #2. 100원 미만의 포인트를 충전할 수 없다.
+     #3. 포인트 충전은 최소 10원 단위로 수행한다.
+    * */
     @Override
     public UserPoint chargeUserPoint(long userId, long amount) {
         // 존재하지 않는 사용자여도 포인트 충전 가능

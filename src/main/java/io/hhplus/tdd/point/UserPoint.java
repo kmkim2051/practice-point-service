@@ -5,30 +5,43 @@ public record UserPoint(
         long point,
         long updateMillis
 ) {
+    private static final long MINIMUM_USE_AMOUNT = 100L;
+    private static final long MINIMUM_CHARGE_AMOUNT = 100L;
+    private static final long MINIMUM_CHARGE_UNIT = 10L;
 
     public static UserPoint empty(long id) {
         return new UserPoint(id, 0, System.currentTimeMillis());
     }
 
-    public boolean canUse(long point) {
-        return isPositive(point) && (this.point >= point);
+    public boolean canUse(long amount) {
+        return isPositive(amount) && (this.point >= amount);
     }
 
-    public UserPoint use(long point) {
-        if (!canUse(point)) {
+    public UserPoint use(long amount) {
+        if (!canUse(amount)) {
             throw new IllegalStateException("잔액이 부족합니다.");
         }
-        return new UserPoint(id, this.point - point, System.currentTimeMillis());
+        return new UserPoint(id, this.point - amount, System.currentTimeMillis());
     }
 
-    public UserPoint charge(long point) {
-        if (!isPositive(point)) {
-            throw new IllegalArgumentException("포인트는 0보다 커야합니다.");
-        }
-        return new UserPoint(id, this.point + point, System.currentTimeMillis());
+    public UserPoint charge(long amount) {
+        validateChargeAmount(amount);
+        return new UserPoint(id, this.point + amount, System.currentTimeMillis());
     }
 
     private static boolean isPositive(long point) {
         return point > 0;
+    }
+
+    private void validateChargeAmount(long amount) {
+        if (!isPositive(amount)) {
+            throw new IllegalArgumentException("포인트는 0보다 커야합니다.");
+        }
+        if (amount < MINIMUM_CHARGE_AMOUNT) {
+            throw new IllegalArgumentException();
+        }
+        if (amount % MINIMUM_CHARGE_UNIT != 0) {
+            throw new IllegalArgumentException();
+        }
     }
 }

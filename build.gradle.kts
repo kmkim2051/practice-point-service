@@ -35,7 +35,7 @@ java {
 }
 
 with(extensions.getByType(JacocoPluginExtension::class.java)) {
-    toolVersion = "0.8.7"
+    toolVersion = "0.8.11"
 }
 
 // bundling tasks
@@ -49,4 +49,14 @@ tasks.getByName("jar") {
 tasks.test {
     ignoreFailures = true
     useJUnitPlatform()
+    finalizedBy("jacocoTestReport")
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(false)
+    }
 }

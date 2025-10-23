@@ -23,12 +23,14 @@ import static org.mockito.Mockito.*;
  *     - 포인트 내역 조회 테스트를 위해, 데이터를 셋업하는 로직이 구현되어야 함
  *     - 잔고가 부족할 경우, 포인트 사용은 실패하여야 함
  *
- * - 직접 추가하는 요구사항
- *     - 비즈니스를 개발하다 보면 여러 가지 정책적인 부분이 결정되어야 함
- *     - 개별적으로 3가지의 요구사항을 정의하고, 이를 구현함
- *         - ex) 포인트 출금은 1000원 이하로 할 수 없다
- *         - ex) 포인트 사용은 100원 단위로만 가능하다
- *
+
+ 포인트 서비스 정책
+ [사용 정책]
+ #1. 100원 미만의 포인트를 사용할 수 없다.
+ [충전 정책]
+ #2. 100원 미만의 포인트를 충전할 수 없다.
+ #3. 포인트 충전은 최소 10원 단위로 수행한다.
+
  *
  * ### **`STEP1 - TDD 기본`**
  * - /point 패키지(디렉토리) 내에 PointService 기본 기능 작성
@@ -42,7 +44,7 @@ import static org.mockito.Mockito.*;
  * - 동일한 사용자에 대한 동시 요청이 정상적으로 처리될 수 있도록 개선
  * - 주어진 4가지 기능에 대한 통합 테스트 작성
  * - 선택한 언어에 대한 동시성 제어 방식 및 장/단점을 기술한 보고서 작성 (README.md)
- * */
+ **/
 @DisplayName("PointService 단위 테스트")
 public class PointServiceTest {
 
@@ -81,10 +83,46 @@ public class PointServiceTest {
             assertThat(userPoint.point()).isEqualTo(currentAmount);
         }
     }
-
+    /*
+     [충전 정책]
+       #2. 100원 미만의 포인트를 충전할 수 없다.
+       #3. 포인트 충전은 10원 단위로 수행한다.
+     */
     @Nested
     @DisplayName("포인트 충전")
     class ChargeUserPoint {
+
+        @Test
+        @DisplayName("100원 미만의 포인트를 충전 시 예외가 발생한다")
+        void cantChargeLessThan100() {
+            // given
+            long userId = 1L;
+            long invalidAmount = 99L;
+            when(userPointTable.selectById(userId))
+                    .thenReturn(new UserPoint(userId, 0, System.currentTimeMillis()));
+
+            // when & then
+            assertThatThrownBy(() -> pointService.chargeUserPoint(userId, invalidAmount))
+                    .isInstanceOf(IllegalArgumentException.class);
+
+            verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
+        }
+
+        @Test
+        @DisplayName("10원 단위가 아닌 포인트를 충전 시 예외가 발생한다")
+        void cantChargeNotMultipleOf10() {
+            // given
+            long userId = 1L;
+            long invalidAmount = 105L;
+            when(userPointTable.selectById(userId))
+                    .thenReturn(new UserPoint(userId, 0, System.currentTimeMillis()));
+
+            // when & then
+            assertThatThrownBy(() -> pointService.chargeUserPoint(userId, invalidAmount))
+                    .isInstanceOf(IllegalArgumentException.class);
+
+            verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
+        }
 
         @Test
         @DisplayName("포인트를 충전 후 조회하면, 포인트는 충전 금액만큼 증가한다")

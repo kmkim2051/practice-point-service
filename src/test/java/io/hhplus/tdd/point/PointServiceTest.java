@@ -164,7 +164,7 @@ public class PointServiceTest {
                     .thenReturn(chargedPoint);
 
             // when
-            UserPoint result = pointService.chargeUserPoint(userId, chargeAmount);
+            pointService.chargeUserPoint(userId, chargeAmount);
 
             // then
             verify(pointHistoryTable, times(1))
@@ -172,9 +172,27 @@ public class PointServiceTest {
         }
     }
 
+//     [사용 정책]
+//    #1. 100원 미만의 포인트를 사용할 수 없다.
     @Nested
     @DisplayName("포인트 사용")
     class UseUserPoint {
+
+        @Test
+        @DisplayName("100원 미만의 포인트를 사용할 수 없다.")
+        void cantUsePointLessThan100() {
+            // given
+            long userId = 1L;
+            long invalidAmount = 99L;
+            when(userPointTable.selectById(userId)).thenReturn(new UserPoint(userId, 500, System.currentTimeMillis()));
+
+            // when, then
+            assertThatThrownBy(() -> pointService.useUserPoint(userId, invalidAmount))
+                    .isInstanceOf(IllegalStateException.class);
+
+            verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
+
+        }
 
         @Test
         @DisplayName("포인트를 사용하면 사용 금액만큼 차감된다")

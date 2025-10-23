@@ -2,7 +2,6 @@ package io.hhplus.tdd.point;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
-import io.hhplus.tdd.exception.PointException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -255,7 +254,7 @@ public class PointServiceTest {
                     .thenReturn(usedPoint);
 
             // when
-            UserPoint userPoint = pointService.useUserPoint(userId, toUse);
+            pointService.useUserPoint(userId, toUse);
 
             // then
             verify(pointHistoryTable, times(1))

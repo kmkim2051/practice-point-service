@@ -11,9 +11,9 @@ public interface PointService {
     UserPoint getUserPoint(long userId);
 
     /**
-     * 특정 유저의 포인트 충전/이용 내역을 조회합니다.
+     * 특정 유저의 포인트 충전/사용 내역을 조회합니다.
      * @param userId 유저 아이디
-     * @return 특정 유저의 포인트 충전/이용 내역 목록
+     * @return 특정 유저의 포인트 충전/사용 내역 목록
      * */
     List<PointHistory> getUserPointHistories(long userId);
 

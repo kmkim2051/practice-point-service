@@ -10,15 +10,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-/*
-포인트 서비스 정책
-[출금 정책]
- #1. 100원 미만의 포인트를 출금할 수 없다.
-[충전 정책]
- #2. 100원 미만의 포인트를 충전할 수 없다.
- #3. 포인트 충전은 10원 단위로 수행한다.
-*/
-
 @Service
 @RequiredArgsConstructor
 public class PointServiceImpl implements PointService {
@@ -26,7 +17,6 @@ public class PointServiceImpl implements PointService {
     private final PointHistoryTable pointHistoryTable;
     private final ConcurrentHashMap<Long, ReentrantLock> userLocks = new ConcurrentHashMap<>();
 
-    // UserPointTable의 HashMap이 thread-safe하지 않으므로, Table 접근을 보호하는 전역 락
     private final ReentrantLock tableAccessLock = new ReentrantLock(true);
 
     /**
@@ -57,10 +47,7 @@ public class PointServiceImpl implements PointService {
             tableAccessLock.unlock();
         }
     }
-    /* [충전 정책]
-     #2. 100원 미만의 포인트를 충전할 수 없다.
-     #3. 포인트 충전은 최소 10원 단위로 수행한다.
-    * */
+
     @Override
     public UserPoint chargeUserPoint(long userId, long amount) {
         ReentrantLock lock = getUserLock(userId);

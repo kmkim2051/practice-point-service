@@ -13,39 +13,6 @@ import static io.hhplus.tdd.exception.PointException.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-/**
- * 요구 기능
- * 1. 사용자 id로 포인트 조회
- * 2. 충전
- * 3. 포인트 사용
- * 4. 포인트 충전/사용 내역 조회
- *
- * - 기능 요구사항
- *     - 포인트 내역 조회 테스트를 위해, 데이터를 셋업하는 로직이 구현되어야 함
- *     - 잔고가 부족할 경우, 포인트 사용은 실패하여야 함
- *
-
- 포인트 서비스 정책
- [사용 정책]
- #1. 100원 미만의 포인트를 사용할 수 없다.
- [충전 정책]
- #2. 100원 미만의 포인트를 충전할 수 없다.
- #3. 포인트 충전은 최소 10원 단위로 수행한다.
-
- *
- * ### **`STEP1 - TDD 기본`**
- * - /point 패키지(디렉토리) 내에 PointService 기본 기능 작성
- * - /database 패키지의 구현체는 수정하지 않고, 이를 활용해 기능 구현
- * - 각 기능에 대한 단위 테스트 작성
- * - 총 4가지 기본 기능 구현 (포인트 조회, 충전, 사용, 내역 조회)
- *
- * ### **`STEP2 - TDD 심화`**
- *
- * - 포인트 충전, 사용에 대한 정책 추가 (잔고 부족, 최대 잔고 등)
- * - 동일한 사용자에 대한 동시 요청이 정상적으로 처리될 수 있도록 개선
- * - 주어진 4가지 기능에 대한 통합 테스트 작성
- * - 선택한 언어에 대한 동시성 제어 방식 및 장/단점을 기술한 보고서 작성 (README.md)
- **/
 @DisplayName("PointService 단위 테스트")
 public class PointServiceTest {
 
@@ -84,11 +51,7 @@ public class PointServiceTest {
             assertThat(userPoint.point()).isEqualTo(currentAmount);
         }
     }
-    /*
-     [충전 정책]
-       #2. 100원 미만의 포인트를 충전할 수 없다.
-       #3. 포인트 충전은 10원 단위로 수행한다.
-     */
+
     @Nested
     @DisplayName("포인트 충전")
     class ChargeUserPoint {
@@ -173,8 +136,6 @@ public class PointServiceTest {
         }
     }
 
-//     [사용 정책]
-//    #1. 100원 미만의 포인트를 사용할 수 없다.
     @Nested
     @DisplayName("포인트 사용")
     class UseUserPoint {

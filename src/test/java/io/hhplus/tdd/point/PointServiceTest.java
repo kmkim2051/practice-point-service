@@ -87,7 +87,7 @@ public class PointServiceTest {
     class ChargeUserPoint {
 
         @Test
-        @DisplayName("포인트를 충전하면 충전 금액만큼 증가한다")
+        @DisplayName("포인트를 충전 후 조회하면, 포인트는 충전 금액만큼 증가한다")
         void chargePoint() {
             // given
             long userId = 1L;
@@ -107,6 +107,30 @@ public class PointServiceTest {
             assertThat(userPoint).isNotNull();
             assertThat(userPoint.id()).isEqualTo(userId);
             assertThat(userPoint.point()).isEqualTo(amount);
+        }
+
+        @Test
+        @DisplayName("사용자가 포인트를 충전하면, 충전 내역이 히스토리에 기록된다")
+        void chargeUserPoint_ThenCreatePointHistory() {
+            // given
+            long userId = 1L;
+            long currentAmount = 200L;
+            long chargeAmount = 1000L;
+
+            UserPoint currentPoint = new UserPoint(userId, currentAmount, System.currentTimeMillis());
+            UserPoint chargedPoint = new UserPoint(userId, currentAmount + chargeAmount, System.currentTimeMillis());
+
+            when(userPointTable.selectById(userId))
+                    .thenReturn(currentPoint);
+            when(userPointTable.insertOrUpdate(userId, currentAmount + chargeAmount))
+                    .thenReturn(chargedPoint);
+
+            // when
+            UserPoint result = pointService.chargeUserPoint(userId, chargeAmount);
+
+            // then
+            verify(pointHistoryTable, times(1))
+                    .insert(eq(userId), eq(chargeAmount), eq(TransactionType.CHARGE), anyLong());
         }
     }
 
@@ -154,6 +178,30 @@ public class PointServiceTest {
                     .hasMessageContaining("잔액이 부족합니다");
 
             verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
+        }
+
+        @Test
+        @DisplayName("포인트를 사용하면, 사용 내역이 히스토리에 기록된다")
+        void usePoint_thenCreateHistory() {
+            // given
+            long userId = 1L;
+            long currentAmount = 1000L;
+            long toUse = 100;
+
+            UserPoint currentPoint = new UserPoint(userId, currentAmount, System.currentTimeMillis());
+            UserPoint usedPoint = new UserPoint(userId, currentAmount - toUse, System.currentTimeMillis());
+
+            when(userPointTable.selectById(userId))
+                    .thenReturn(currentPoint);
+            when(userPointTable.insertOrUpdate(userId, currentAmount - toUse))
+                    .thenReturn(usedPoint);
+
+            // when
+            UserPoint userPoint = pointService.useUserPoint(userId, toUse);
+
+            // then
+            verify(pointHistoryTable, times(1))
+                    .insert(eq(userId), eq(toUse), eq(TransactionType.USE), anyLong());
         }
     }
 

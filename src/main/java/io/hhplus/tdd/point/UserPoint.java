@@ -1,5 +1,7 @@
 package io.hhplus.tdd.point;
 
+import static io.hhplus.tdd.exception.PointException.*;
+
 public record UserPoint(
         long id,
         long point,
@@ -13,20 +15,20 @@ public record UserPoint(
         return new UserPoint(id, 0, System.currentTimeMillis());
     }
 
-    public boolean canUse(long amount) {
+    public void validateUsage(long amount) {
         if (!isPositive(amount)) {
-            throw new IllegalArgumentException("사용할 포인트는 0보다 커야 합니다.");
+            throw new InvalidUseAmountException("사용할 포인트는 0보다 커야 합니다.");
         }
         if (amount < MINIMUM_USE_AMOUNT) {
-            throw new IllegalArgumentException("최소 사용 금액은 %d원 입니다.".formatted(MINIMUM_USE_AMOUNT));
+            throw new InvalidUseAmountException("최소 사용 금액은 %d원 입니다.".formatted(MINIMUM_USE_AMOUNT));
         }
-        return (this.point >= amount);
+        if (this.point < amount) {
+            throw new InsufficientPointException("잔액이 부족합니다.");
+        }
     }
 
     public UserPoint use(long amount) {
-        if (!canUse(amount)) {
-            throw new IllegalStateException("잔액이 부족합니다.");
-        }
+        validateUsage(amount);
         return new UserPoint(id, this.point - amount, System.currentTimeMillis());
     }
 
@@ -41,13 +43,13 @@ public record UserPoint(
 
     private void validateChargeAmount(long amount) {
         if (!isPositive(amount)) {
-            throw new IllegalArgumentException("포인트는 0보다 커야 합니다.");
+            throw new InvalidChargeAmountException("포인트는 0보다 커야 합니다.");
         }
         if (amount < MINIMUM_CHARGE_AMOUNT) {
-            throw new IllegalArgumentException("최소 충전 금액은 %d원 입니다.".formatted(MINIMUM_CHARGE_AMOUNT));
+            throw new InvalidChargeAmountException("최소 충전 금액은 %d원 입니다.".formatted(MINIMUM_CHARGE_AMOUNT));
         }
         if (isInvalidUnit(amount)) {
-            throw new IllegalArgumentException("포인트는 %d원 단위로만 충전할 수 있습니다.".formatted(MINIMUM_CHARGE_UNIT));
+            throw new InvalidChargeAmountException("포인트는 %d원 단위로만 충전할 수 있습니다.".formatted(MINIMUM_CHARGE_UNIT));
         }
     }
 

@@ -2,6 +2,7 @@ package io.hhplus.tdd.point;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+import io.hhplus.tdd.exception.PointException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static io.hhplus.tdd.exception.PointException.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -103,7 +105,7 @@ public class PointServiceTest {
 
             // when & then
             assertThatThrownBy(() -> pointService.chargeUserPoint(userId, invalidAmount))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(InvalidChargeAmountException.class);
 
             verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
         }
@@ -119,7 +121,7 @@ public class PointServiceTest {
 
             // when & then
             assertThatThrownBy(() -> pointService.chargeUserPoint(userId, invalidAmount))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(InvalidChargeAmountException.class);
 
             verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
         }
@@ -188,7 +190,7 @@ public class PointServiceTest {
 
             // when, then
             assertThatThrownBy(() -> pointService.useUserPoint(userId, invalidAmount))
-                    .isInstanceOf(IllegalArgumentException.class);
+                    .isInstanceOf(InvalidUseAmountException.class);
 
             verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
 
@@ -230,7 +232,7 @@ public class PointServiceTest {
 
             // when & then
             assertThatThrownBy(() -> pointService.useUserPoint(userId, useAmount))
-                    .isInstanceOf(IllegalStateException.class)
+                    .isInstanceOf(InsufficientPointException.class)
                     .hasMessageContaining("잔액이 부족합니다");
 
             verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());

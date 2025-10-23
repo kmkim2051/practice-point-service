@@ -188,7 +188,7 @@ public class PointServiceTest {
 
             // when, then
             assertThatThrownBy(() -> pointService.useUserPoint(userId, invalidAmount))
-                    .isInstanceOf(IllegalStateException.class);
+                    .isInstanceOf(IllegalArgumentException.class);
 
             verify(userPointTable, never()).insertOrUpdate(anyLong(), anyLong());
 

@@ -14,7 +14,13 @@ public record UserPoint(
     }
 
     public boolean canUse(long amount) {
-        return isPositive(amount) && (this.point >= amount);
+        if (!isPositive(amount)) {
+            throw new IllegalArgumentException("사용할 포인트는 0보다 커야 합니다.");
+        }
+        if (amount < MINIMUM_USE_AMOUNT) {
+            throw new IllegalArgumentException("최소 사용 금액은 %d원 입니다.".formatted(MINIMUM_USE_AMOUNT));
+        }
+        return (this.point >= amount);
     }
 
     public UserPoint use(long amount) {
@@ -35,13 +41,17 @@ public record UserPoint(
 
     private void validateChargeAmount(long amount) {
         if (!isPositive(amount)) {
-            throw new IllegalArgumentException("포인트는 0보다 커야합니다.");
+            throw new IllegalArgumentException("포인트는 0보다 커야 합니다.");
         }
         if (amount < MINIMUM_CHARGE_AMOUNT) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("최소 충전 금액은 %d원 입니다.".formatted(MINIMUM_CHARGE_AMOUNT));
         }
-        if (amount % MINIMUM_CHARGE_UNIT != 0) {
-            throw new IllegalArgumentException();
+        if (isInvalidUnit(amount)) {
+            throw new IllegalArgumentException("포인트는 %d원 단위로만 충전할 수 있습니다.".formatted(MINIMUM_CHARGE_UNIT));
         }
+    }
+
+    private static boolean isInvalidUnit(long amount) {
+        return amount % MINIMUM_CHARGE_UNIT != 0;
     }
 }
